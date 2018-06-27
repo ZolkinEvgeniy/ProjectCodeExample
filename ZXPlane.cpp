@@ -59,7 +59,6 @@ ZXPlane* ZXPlane::create()
 ZXPlane::~ZXPlane()
 {
     CC_SAFE_RELEASE(mAnimations);
-    //CC_SAFE_RELEASE(mDefendedObjects);
 }
 
 bool ZXPlane::init()
@@ -78,18 +77,10 @@ bool ZXPlane::init()
     mNeedRotation = false;
     mDeformationState = PlaneAnimation_100;
     
-    //mDefendedObjects = Array::create();
-    
     mPlaneSprite = Sprite::create("images/game_layer/plane/plane_1.png");
     mPlaneSprite->setAnchorPoint(Point::ZERO);
     addChild(mPlaneSprite, -1);
     setContentSize(mPlaneSprite->getContentSize());
-//    setTexture(texture);
-//    Rect rect = Rect::ZERO;
-//    rect.size = texture->getContentSize();
-//    setTextureRect(rect);
-    
-    //setAnchorPoint(Point(0.5, 0.5));
     
     mShieldSprite = Sprite::create(upgrade_shield_plane_image);
     mShieldSprite->setAnchorPoint(Point(0.5, 0.5));
@@ -99,7 +90,6 @@ bool ZXPlane::init()
     
     createAnimations();
 
-    //changeState(kPlaneState_Shield);
     changeState(kPlaneState_Forward);
 
     scheduleUpdate();
@@ -196,11 +186,6 @@ void ZXPlane::createAnimations()
     repeatAction->setTag(kPlaneActionTag_UpDown);
     mAnimations->setObject(repeatAction, PlaneAnimation_UpDown);
     
-    
-// fire
-    //SpriteBatchNode* spriteBatch = SpriteBatchNode::create(String::createWithFormat("%s/fire.png", game_layer_fire_dir)->getCString());
-    //mPlaneSprite->addChild(spriteBatch);
-
     Animate* fireAnim = ZXObjectFactory::Instanse()->createAnimation("images/game_layer/images_1", "fire", 3, 0.2f);
 
     mFireSprite = Sprite::createWithSpriteFrameName("fire_1.png");
@@ -216,7 +201,6 @@ void ZXPlane::createAnimations()
     addChild(emitter);
     emitter->setPosition(Point(mFireSprite->getPositionX() - mFireSprite->getContentSize().width, mFireSprite->getPositionY()));
     emitter->setTag(kPlaneChildTag_Smoke);
-    //emitter->setVisible(false);
     emitter->stopSystem();
 }
 
@@ -227,9 +211,7 @@ void ZXPlane::touchEnded()
 
 void ZXPlane::applyForce(cocos2d::Point force)
 {
-    CCLOG("Force before = %f, Added force = %f", mForce.x, force.x);
     mForce = mForce + force;
-    CCLOG("Force after = %f", mForce.x);
 }
 
 void ZXPlane::applyLinearImpulse(cocos2d::Point impulse)
@@ -261,7 +243,6 @@ void ZXPlane::setLinearVelocity(cocos2d::Point vel)
 void ZXPlane::clearForce()
 {
     mForce = Point::ZERO;
-    //CCLOG("Force cleared");
 }
 
 void ZXPlane::update(float delta)
@@ -271,15 +252,7 @@ void ZXPlane::update(float delta)
 
 void ZXPlane::operate(float dt)
 {
-    solve();
     simulate(dt);
-}
-
-void ZXPlane::solve()
-{
-    //applyForce(mGravitation * mMass);				// гравитация
-    
-    //applyForce(-mVelocity * mAirFrictionConstant);	// Сопротивление ввоздуха
 }
 
 void ZXPlane::simulate(float dt)
@@ -300,7 +273,6 @@ void ZXPlane::simulate(float dt)
     if (mVelocity.x < kSpeedXBackMax + kSpeedXBackPlus * ZXGameManager::Instance()->getGameLayer()->getSpeedFactor()) {
         mVelocity.x = kSpeedXBackMax + kSpeedXBackPlus * ZXGameManager::Instance()->getGameLayer()->getSpeedFactor();
     }
-    //CCLOG("Velocity.x = %f", mVelocity.x);
     
     Point newPos = getPosition() + mVelocity /** dt*/;
     
@@ -315,14 +287,10 @@ void ZXPlane::simulate(float dt)
         mVelocity.y = 0;
     }
     Size screenSize = Director::getInstance()->getWinSize();
-    //if (newPos.x < screenSize.width * kMaxPlanePosX)
+    if (newPos.x > screenSize.width * kMaxPlanePosX)
     {
-        //newPos.x += mSpeedX * dt;
-        if (newPos.x > screenSize.width * kMaxPlanePosX)
-        {
-            newPos.x = screenSize.width * kMaxPlanePosX;
-            mVelocity.x = 0;
-        }
+        newPos.x = screenSize.width * kMaxPlanePosX;
+        mVelocity.x = 0;
     }
     this->setPosition(newPos);
     
@@ -399,7 +367,6 @@ void ZXPlane::collideWithObjectType(ZXCollideObject* object)
         case kColliderType_CloudEmpty:
         {
             auto itr = std::find(mDefendedObjects2.begin(), mDefendedObjects2.end(), object);
-            //if (mDefendedObjects->containsObject(object))
             if (itr != mDefendedObjects2.end())
             {
                 CCLOG("Object Defended!!!!!!!!!!!!!");
@@ -463,7 +430,6 @@ void ZXPlane::moveBack()
     Point targetPos = Point(0, screenSize.height * 0.8);
     float dist = getPosition().getDistance(targetPos);
     Point pointOnLine = getPosition().lerp(targetPos, maxDistance / dist);
-    //CCLOG("Target pos (%f, %f), dist = %f, Point on line: (%f, %f)", targetPos.x, targetPos.y, dist, pointOnLine.x, pointOnLine.y);
     
     ActionInterval* moveAction = MoveTo::create(DURATION_FOR_MOVE_BACK, pointOnLine);
     ActionInterval* easeAction = EaseOut::create(moveAction, 2.5);
@@ -512,21 +478,12 @@ void ZXPlane::collideWithCloudThunder()
     mFireSprite->setVisible(true);
     
     ParticleSystem* emitter = (ParticleSystem*)getChildByTag(kPlaneChildTag_Smoke);
-    //emitter->setVisible(true);
     if(!emitter->isActive())
     {
         emitter->resetSystem();
     }
     
     schedule(schedule_selector(ZXPlane::collidingWithCloudThunderIntervalFinished), 1);
-}
-
-void ZXPlane::setFireEnabled(bool isEnable)
-{
-    if (isEnable)
-    {
-        
-    }
 }
 
 void ZXPlane::collidingWithCloudThunderIntervalFinished(float dt)
@@ -549,7 +506,6 @@ void ZXPlane::collidingWithCloudThunderFinished()
     removeStateFlag(kPlaneState_Burn);
 
     ParticleSystem* emitter = (ParticleSystem*)getChildByTag(kPlaneChildTag_Smoke);
-    //emitter->setVisible(false);
     emitter->stopSystem();
 }
 
@@ -604,7 +560,6 @@ void ZXPlane::resumePlaneAndSchedulersTimers()
 
 void ZXPlane::changeState(ZXPlaneState state, ZXCollideObject* collideObject)
 {
-    //CCLOG("Enter state = %d", state);
     if (kPlaneState_Wet == state)
     {
         if (stateFlagExists(kPlaneState_Burn))
@@ -621,8 +576,6 @@ void ZXPlane::changeState(ZXPlaneState state, ZXCollideObject* collideObject)
         else if (stateFlagExists(kPlaneState_Shield))
         {
             CCLOG("Current State = SHIELD");
-            //removeStateFlag(kPlaneState_Shield);
-            //mShieldSprite->setVisible(false);
         }
         else
         {
@@ -648,8 +601,6 @@ void ZXPlane::changeState(ZXPlaneState state, ZXCollideObject* collideObject)
         else if (stateFlagExists(kPlaneState_Shield))
         {
             CCLOG("Current State = SHIELD");
-            //removeStateFlag(kPlaneState_Shield);
-            //mShieldSprite->setVisible(false);
         }
         else
         {
@@ -663,8 +614,6 @@ void ZXPlane::changeState(ZXPlaneState state, ZXCollideObject* collideObject)
         if (stateFlagExists(kPlaneState_Shield))
         {
             CCLOG("Current State = SHIELD");
-            //removeStateFlag(kPlaneState_Shield);
-            //mShieldSprite->setVisible(false);
         }
          moveBack();
     }
@@ -673,8 +622,6 @@ void ZXPlane::changeState(ZXPlaneState state, ZXCollideObject* collideObject)
         if (stateFlagExists(kPlaneState_Shield))
         {
             CCLOG("Current State = SHIELD");
-            //removeStateFlag(kPlaneState_Shield);
-            //mShieldSprite->setVisible(false);
         }
         else
         {
@@ -686,17 +633,11 @@ void ZXPlane::changeState(ZXPlaneState state, ZXCollideObject* collideObject)
         if (stateFlagExists(kPlaneState_Shield))
         {
             CCLOG("Current State = SHIELD");
-            //removeStateFlag(kPlaneState_Shield);
-            //mShieldSprite->setVisible(false);
             if (collideObject)
             {
                 mDefendedObjects2.push_back(collideObject);
                 CCLOG("Defended objects count = %lu", mDefendedObjects2.size());
             }
-        }
-        else
-        {
-            //moveBack();
         }
     }
     if (kPlaneState_Shield == state)

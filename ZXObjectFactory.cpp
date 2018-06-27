@@ -34,9 +34,6 @@ ZXObjectFactory* ZXObjectFactory::Instanse()
 
 void ZXObjectFactory::init()
 {
-    //SpriteBatchNode* spriteBatch = SpriteBatchNode::create(String::createWithFormat("%s.png", game_layer_sun_path)->getCString());
-    //spriteBatch->retain();
-
     ZXObjectData cloudData1;
     cloudData1.filePath = "cloud_1.png";
     cloudData1.type = kColliderType_CloudEmpty;
@@ -46,8 +43,6 @@ void ZXObjectFactory::init()
     
     ZXObjectData cloudData2;
     cloudData2.filePath = "cloud_rain.png";
-    //cloudData2.animationPath = "animations/clouds_anim.plist";
-    //cloudData2.animationName = "cloud_rain";
     cloudData2.type = kColliderType_CloudRain;
     cloudData2.objBehavArray.push_back(kAnimation_pulse);
     mClouds.push_back(cloudData2);
@@ -101,9 +96,6 @@ void ZXObjectFactory::init()
     bonusObjectData1.filePath = "magnit_1.png";
     bonusObjectData1.animationPath = "animations/magnit_anim.plist";
     bonusObjectData1.animationName = "magnit";
-//    bonusObjectData1.filePath = "bug_1.png";
-//    bonusObjectData1.animationPath = "animations/sun_anim.plist";
-//    bonusObjectData1.animationName = "bug";
     bonusObjectData1.type = kColliderType_BonusMagnet;
     mBonusObjects.push_back(bonusObjectData1);
 }
@@ -205,12 +197,9 @@ ZXCollideObject* ZXObjectFactory::createCloud(int type)
 
     if (!cloudData.animationPath.empty())
     {
-        //CCLOG("Cloud filePath: %s, Animation Name: %s", cloudData.animationPath.c_str(), cloudData.animationName.c_str());
         Animate* animate = createAnimation(cloudData.animationPath.c_str(), cloudData.animationName.c_str());
         Action* action = RepeatForever::create(animate);
         objectSprite->addAnimation(action);
-        //objectSprite->setAnimationDefault(action);
-        //objectSprite->runAction(action);
     }
     for(auto itr = cloudData.objBehavArray.begin();itr != cloudData.objBehavArray.end(); itr++)
     {
@@ -265,7 +254,6 @@ ZXCollideObject* ZXObjectFactory::createCoin(bool withCollider)
     }
     object->setType(kColliderType_Coin);
 
-    //object->runAction(RepeatForever::create(anim));
     object->addAnimation(RepeatForever::create(anim));
     
     return object;
@@ -305,7 +293,6 @@ ZXCollideObject* ZXObjectFactory::createTrashObject(int type)
     
     if (!objectData.animationPath.empty())
     {
-        //CCLOG("Cloud filePath: %s, Animation Name: %s", cloudData.animationPath.c_str(), cloudData.animationName.c_str());
         Animate* animate = createAnimation(objectData.animationPath.c_str(), objectData.animationName.c_str());
         Action* action = RepeatForever::create(animate);
         objectSprite->addAnimation(action);
@@ -348,12 +335,10 @@ ZXCollideObject* ZXObjectFactory::createTree(const char *spritePath, cocos2d::Po
     objectSprite->setPosition(pos);
     
     Sprite* obj = Sprite::createWithSpriteFrameName("tree_leaf_0.png");
-    //obj->setTextureRect(objectSprite->getTextureRect());
     Action* anim = createAnimation("animations/tree_leafs_anim.plist", "tree_leafs");
     obj->setAnchorPoint(Point(0, -0.2));
     objectSprite->addCollideObect(obj, anim);
     objectSprite->addChild(obj);
-    //obj->setVisible(false);
 
     return objectSprite;
 }

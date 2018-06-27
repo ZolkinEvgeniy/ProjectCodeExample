@@ -77,7 +77,6 @@ public:
 private:
     virtual bool init();
     virtual void update(float delta);
-    void solve();
     void simulate(float dt);
     virtual void draw();
     void correctWithLimits(cocos2d::Point& point);
@@ -95,7 +94,6 @@ private:
     void removeStateFlag(ZXPlaneState flag) { mStateFlags &= ~flag; }
     void rotatePlane(float delta);
     void runCollideAnimation(ZXPlaneState state);
-    void setFireEnabled(bool state);
     void upgradeMagnetFinished(float dt);
     void nonGravitationFinished(float dt);
     
@@ -127,7 +125,6 @@ private:
     cocos2d::Action* mAnimationInCloud;
     cocos2d::Sprite* mFireSprite;
     
-    //cocos2d::Array* mDefendedObjects; // объекты, в которые самолет попал со щитом. удаляются при выходе из их области пересечения
     std::list<ZXCollideObject*> mDefendedObjects2;
 };
 
